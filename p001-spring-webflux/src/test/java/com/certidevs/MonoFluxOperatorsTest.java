@@ -4,12 +4,14 @@ import com.certidevs.entity.Manufacturer;
 import com.certidevs.entity.Product;
 import com.certidevs.repository.ManufacturerRepository;
 import com.certidevs.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -203,7 +205,90 @@ public class MonoFluxOperatorsTest {
     }
 
 
+    @Test
+    void switchIfEmpty() {
+        Mono<Product> productMono = productRepository.findById(9999L)
+                .switchIfEmpty(Mono.just(new Product()));
 
+        StepVerifier.create(productMono)
+                .expectNextMatches(p -> p.getTitle() == null)
+                .verifyComplete();
+
+
+        // Ejemplo en API REST con ServerResponse
+        // con map Mono<Mono<ServerResponse>>, mejor usar flatMap
+        Mono<ServerResponse> response = productRepository.findById(9999L)
+                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .switchIfEmpty(ServerResponse.notFound().build());
+
+        StepVerifier.create(response)
+                .expectNextMatches(r -> r.statusCode().is4xxClientError())
+                .verifyComplete();
+    }
+
+    @Test
+    void onErrorResume() {
+        /*
+        onErrorResume muy útil en un controlador para decidir qué responder en caso de fallo, por ejemplo
+        ServerResponse.status(HttpStatus.CONFLICT).build()
+         */
+        Mono<Product> productMono = productRepository.findById(product1.getId())
+                .flatMap(p -> Mono.<Product>error(new RuntimeException("Error")))
+                .onErrorResume(throwable -> {
+                    // log.error("Error guardando / borrando", throwable);
+                    return Mono.just(new Product());
+                });
+
+        StepVerifier.create(productMono)
+                .expectNextMatches(p -> p.getTitle() == null)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("concat se ejecuta secuencialmente esperando a que uno acabe antes de empezar el siguiente")
+    void fluxConcat() {
+        var lt2Flux = productRepository.findAll().filter(p -> p.getQuantity() < 2); // 1
+        var gt30Flux = productRepository.findAll().filter(p -> p.getQuantity() > 30); // 1
+        var allFlux = Flux.concat(lt2Flux, gt30Flux);
+
+        StepVerifier.create(allFlux)
+                .expectNextCount(2)
+                .verifyComplete();
+
+    }
+
+    @Test
+    @DisplayName("merge invoca de forma eager los publishers en vez de esperar secuencialmente como hace concat")
+    void fluxMerge() {
+        // ideal para traer datos no relacionados de distintas apis/fuentes que no estén relacionados
+        var lt2Flux = productRepository.findAll().filter(p -> p.getQuantity() < 2); // 1
+        var gt30Flux = productRepository.findAll().filter(p -> p.getQuantity() > 30); // 1
+        var allFlux = Flux.merge(lt2Flux, gt30Flux);
+
+        StepVerifier.create(allFlux)
+                .expectNextCount(2)
+                .verifyComplete();
+
+    }
+
+    @Test
+    @DisplayName("flux para combinar datos de distinto tipo por posición en forma de tuplas")
+    void fluxZip () {
+
+        Flux<String> titlesFlux = productRepository.findAll().map(Product::getTitle);
+        Flux<Double> pricesFlux = productRepository.findAll().map(Product::getPrice);
+
+        // Product 1 - 20 €
+        // Product 2 - 30 €
+        Flux<String> zip = Flux.zip(titlesFlux, pricesFlux)
+                .map(tuple -> tuple.getT1() + " - " + tuple.getT2() + " €");
+
+        StepVerifier.create(zip)
+                .expectNext("Product 1 - 10.0 €")
+                .expectNext("Product 2 - 20.0 €")
+                .expectNext("Product 3 - 30.0 €")
+                .verifyComplete();
+    }
 
     // diferencia block, subscribe, stepverifier y agotar flujo, just, error
 
