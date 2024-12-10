@@ -16,6 +16,8 @@ public interface ProductRepository extends ReactiveCrudRepository<Product, Long>
     Mono<Boolean> existsByManufacturerId(Long manufacturerId);
 
     Flux<Product> findByManufacturerId(Long manufacturerId);
+    Flux<Product> findByActiveTrue();
+    Flux<Product> findByActiveFalse();
 
     @Query("""
     SELECT * FROM product WHERE quantity < :quantity
