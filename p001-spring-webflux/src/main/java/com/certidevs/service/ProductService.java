@@ -109,5 +109,18 @@ public class ProductService {
                 });
     }
 
+    public Mono<Product> findByIdWithManufacturer(Long id) {
+        return null;
+    }
+    public Flux<Product> findAllWithManufacturer() {
+        return null;
+    }
+    public Mono<Product> findByIdWithManufacturerAndRatings(Long id) {
+        return null;
+    }
+    public Mono<Product> findRemoteById(Long id) {
+        return null;
+    }
+
 
 }

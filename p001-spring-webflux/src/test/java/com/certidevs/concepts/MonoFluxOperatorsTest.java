@@ -1,10 +1,9 @@
-package com.certidevs;
+package com.certidevs.concepts;
 
 import com.certidevs.entity.Manufacturer;
 import com.certidevs.entity.Product;
 import com.certidevs.repository.ManufacturerRepository;
 import com.certidevs.repository.ProductRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +17,6 @@ import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
