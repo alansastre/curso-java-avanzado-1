@@ -26,6 +26,10 @@ public class ProductService {
         });
     }
 
+    public Mono<Product> findById(Long id) {
+        return productRepository.findById(id);
+    }
+
     public Mono<Product> save(Product product) {
         product.setActive(true);
         product.setCreationDate(LocalDateTime.now());
