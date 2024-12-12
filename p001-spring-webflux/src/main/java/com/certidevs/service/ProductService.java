@@ -30,6 +30,10 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    public Mono<Boolean> existsById(Long id) {
+        return productRepository.existsById(id);
+    }
+
     public Mono<Product> save(Product product) {
         product.setActive(true);
         product.setCreationDate(LocalDateTime.now());
@@ -44,6 +48,10 @@ public class ProductService {
                     // BeanUtils.copyProperties(product, productDB);
                     return productRepository.save(productDB);
                 });
+    }
+
+    public Mono<Void> deleteById(Long id) {
+        return productRepository.deleteById(id);
     }
 
     public Flux<Product> increasePriceOfActiveProducts(Double percentage) {

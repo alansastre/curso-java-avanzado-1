@@ -8,7 +8,7 @@ foundation_year INT
 -- AÑADIR UNIQUE A title PARA PROBAR ERROR CONFLICTO 409
 CREATE TABLE product (
  id BIGINT PRIMARY KEY AUTO_INCREMENT,
- title VARCHAR(255) NOT NULL,
+ title VARCHAR(255) NOT NULL UNIQUE,
     price DOUBLE,
     quantity INT,
     active BOOLEAN,
