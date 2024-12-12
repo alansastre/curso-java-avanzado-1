@@ -123,4 +123,7 @@ public class ProductService {
     }
 
 
+    public Mono<Long> count() {
+        return productRepository.count();
+    }
 }

@@ -1,5 +1,6 @@
 package com.certidevs.handler;
 
+import com.certidevs.dto.PaginatedProductResponse;
 import com.certidevs.entity.Product;
 import com.certidevs.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -23,10 +24,32 @@ public class ProductHandler {
     private ProductService productService;
 
     public Mono<ServerResponse> findAll(ServerRequest request) {
-
         return ServerResponse.ok().body(
                 productService.findAll(), Product.class
         );
+    }
+    // paginación
+    public Mono<ServerResponse> findAllPaginated(ServerRequest request) {
+        int page = request.queryParam("page").map(Integer::parseInt).orElse(1);
+        int size = request.queryParam("size").map(Integer::parseInt).orElse(20);
+        int offset = (page - 1) * size;
+
+        return ServerResponse.ok().body(
+                productService.count()
+                .flatMap(total -> productService
+                    .findAll()
+                    .skip(offset)
+                    .take(size)
+                    .collectList()
+                    .map(products -> new PaginatedProductResponse(
+                            products,
+                            page,
+                            size,
+                            total
+                    ))
+        ), PaginatedProductResponse.class);
+
+
     }
 
     public Mono<ServerResponse> findById(ServerRequest request) {

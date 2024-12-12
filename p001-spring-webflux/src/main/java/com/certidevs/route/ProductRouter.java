@@ -49,6 +49,7 @@ public class ProductRouter {
                 .path("/api/route/products", builder -> builder
 //                        .GET("", request -> handler.findAll(request)) // con lambda
                         .GET("", handler::findAll) // con metodo referenciado
+                        .GET("/paginated", handler::findAllPaginated) // con metodo referenciado
                         .GET("{id}", handler::findById)
                         .POST("", handler::create)
                         .PUT("{id}", handler::update)

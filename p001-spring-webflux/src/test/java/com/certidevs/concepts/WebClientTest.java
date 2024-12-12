@@ -1,6 +1,7 @@
 package com.certidevs.concepts;
 
 
+import com.certidevs.dto.PaginatedProductResponse;
 import com.certidevs.dto.ProductStoreDTO;
 import com.certidevs.entity.Product;
 import org.junit.jupiter.api.Test;
@@ -150,6 +151,26 @@ public class WebClientTest {
 //                .verify();
 
 
+    }
+
+
+    @Test
+    void findAllPaginated() {
+        Mono<PaginatedProductResponse> mono = client.get()
+//                .uri("/api/route/products/paginated?page=2&size=5")
+                .uri(
+                        builder -> builder.path("/api/route/products/paginated").queryParam("page", 2).queryParam("size", 5).build()
+                ).retrieve()
+                .bodyToMono(PaginatedProductResponse.class)
+                .doOnNext(res -> {
+                    System.out.println(res.page());
+                    System.out.println(res.size());
+                });
+
+        // TODO : necesario crear un setup en el que haya al menos 5 o más productos para probar la paginación
+        StepVerifier.create(mono)
+                .expectNextMatches(res -> res.page().equals(2) && res.size().equals(5) && res.products().size() == 5)
+                .verifyComplete();
     }
 
 
