@@ -49,10 +49,10 @@ public class ProductRouter {
                 .path("/api/route/products", builder -> builder
 //                        .GET("", request -> handler.findAll(request)) // con lambda
                         .GET("", handler::findAll) // con metodo referenciado
-//                        .GET("", handler::findById)
-//                        .GET("", handler::create)
-//                        .GET("", handler::update)
-//                        .GET("", handler::findAll)
+                        .GET("{id}", handler::findById)
+                        .POST("", handler::create)
+                        .PUT("{id}", handler::update)
+                        .DELETE("{id}", handler::deleteById)
                         .filter(loggingFilter)
                         .onError(IllegalArgumentException.class, (e, serverRequest) -> ServerResponse.badRequest().bodyValue("Invalid input"))
                         .onError(Exception.class, (e, serverRequest) -> ServerResponse.badRequest().bodyValue("Invalid input"))
