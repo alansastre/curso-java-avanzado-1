@@ -2,15 +2,20 @@ package com.certidevs.concepts;
 
 
 import com.certidevs.dto.PaginatedProductResponse;
+import com.certidevs.dto.PaginatedResponse;
 import com.certidevs.dto.ProductStoreDTO;
 import com.certidevs.entity.Product;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -170,6 +175,31 @@ public class WebClientTest {
         // TODO : necesario crear un setup en el que haya al menos 5 o más productos para probar la paginación
         StepVerifier.create(mono)
                 .expectNextMatches(res -> res.page().equals(2) && res.size().equals(5) && res.products().size() == 5)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Cuando tenemos respuestas que usan Generics o que son mas complejas")
+    void findAllPaginatedWithGenerics() {
+
+        // Usamos tipo parametrizado para poder capturar los tipos con Generics
+        var typeRef = new ParameterizedTypeReference<PaginatedResponse<Product>>() {};
+
+        Mono<PaginatedResponse<Product>> mono = client.get()
+//                .uri("/api/route/products/paginated?page=2&size=5")
+                .uri(
+                        builder -> builder.path("/api/route/products/paginated-with-generics").queryParam("page", 2).queryParam("size", 5).build()
+                ).retrieve()
+//                .bodyToMono(typeRef)
+                .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<Product>>() {})
+                .doOnNext(res -> {
+                    List<Product> products = res.getItems();
+                    System.out.println(res.getSize());
+                    System.out.println(res.getTotal());
+                });
+
+        StepVerifier.create(mono)
+                .expectNextMatches(res -> res.getPage().equals(2) && res.getSize().equals(5) && res.getItems().size() == 5)
                 .verifyComplete();
     }
 

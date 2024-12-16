@@ -1,6 +1,8 @@
 package com.certidevs.handler;
 
 import com.certidevs.dto.PaginatedProductResponse;
+import com.certidevs.dto.PaginatedResponse;
+import com.certidevs.dto.PaginatedResponseRecord;
 import com.certidevs.entity.Product;
 import com.certidevs.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -48,9 +50,54 @@ public class ProductHandler {
                             total
                     ))
         ), PaginatedProductResponse.class);
-
-
     }
+
+    /**
+     * Metodo de paginación que usa Generic para probar en WebClient tipos referenciados
+     * @param request
+     * @return
+     */
+    public Mono<ServerResponse> findAllPaginatedWithGeneric(ServerRequest request) {
+        int page = request.queryParam("page").map(Integer::parseInt).orElse(1);
+        int size = request.queryParam("size").map(Integer::parseInt).orElse(20);
+        int offset = (page - 1) * size;
+
+// con lombok builder
+//        return ServerResponse.ok().body(
+//                productService.count()
+//                        .flatMap(total -> productService
+//                                .findAll()
+//                                .skip(offset)
+//                                .take(size)
+//                                .collectList()
+//                                .map(products -> PaginatedResponse.<Product>builder()
+//                                        .items(products)
+//                                        .page(page)
+//                                        .size(size)
+//                                        .total(total)
+//                                        .build()
+//                                )
+//                        ), PaginatedResponse.class);
+
+
+        // con record generic
+        return ServerResponse.ok().body(
+                productService.count()
+                        .flatMap(total -> productService
+                                .findAll()
+                                .skip(offset)
+                                .take(size)
+                                .collectList()
+                                .map(products -> new PaginatedResponseRecord<>(
+                                        products,
+                                        page,
+                                        size,
+                                        total
+                                        )
+                                )
+                        ), PaginatedResponseRecord.class);
+    }
+
 
     public Mono<ServerResponse> findById(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
