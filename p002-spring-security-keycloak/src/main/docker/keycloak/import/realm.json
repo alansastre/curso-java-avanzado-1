@@ -1,0 +1,70 @@
+{
+  "realm": "myrealm",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "my-app",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "defaultRoles": ["USER"],
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "testuser",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "testuser@certidevs.com",
+      "createdTimestamp": 1696118400000,
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "testpassword",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "username": "adminuser",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "adminuser@certidevs.com",
+      "createdTimestamp": 1696118400000,
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "adminpassword",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "myrealm"
+      },
+      {
+        "name": "ADMIN",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "myrealm"
+      }
+    ]
+  }
+}
