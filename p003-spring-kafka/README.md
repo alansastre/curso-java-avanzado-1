@@ -68,3 +68,12 @@ Dependencias para Testing con Docker:
 
 * Producer: KafkaTemplate<K, V>
 * Consumer: @KafkaListener
+
+## REACTOR KAFKA
+
+* Agregar dependencia reactor-kafka en el pom.xml
+
+* KafkaSender
+* KafkaReceiver
+* ReactiveKafkaProducerTemplate
+* ReactiveKafkaConsumerTemplate
