@@ -107,13 +107,15 @@ public class KafkaConfig {
 
                     return new Order(tick, "deposit", amount);
 
-                }).doOnNext(order -> log.info("orderProducer emitido order {}", order))
+                })
+                .doOnNext(order -> log.info("orderProducer emitido order {}", order))
                 .onErrorResume(e -> {
                     log.error("orderProducer error {}", e.getMessage());
                     return Flux.empty();
                 });
     }
 
+    // Estrategia 1
     // Processor SIN DQL: no propaga la excepción a Spring Cloud Stream, la procesa en el onErrorContinue
 //    @Bean
 //    public Function<Flux<Order>, Flux<Notification>> orderProcessor() {
@@ -131,6 +133,9 @@ public class KafkaConfig {
 //                    log.error("orderProcessor onErrorContinue", e);
 //                });
 //    }
+
+    // Estrategia 2
+    // Mover los Orders que den error a un topic de errores: topic-orders-failed-dlq
     // Processor CON DLQ: sí propaga la excepción, no la captura con onErrorContinue ni onErrorResume y la propaga a Spring cloud stream para DLQ:
     @Bean
     public Function<Order, Notification> orderProcessor() {
@@ -157,6 +162,7 @@ public class KafkaConfig {
                 .onErrorContinue((e, o) -> log.error("notificationConsumer onErrorContinue", e))
                 .subscribe(notification -> log.info("Notification procesada {}", notification));
     }
+
 
 
 }
